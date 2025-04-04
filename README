@@ -1,0 +1,15 @@
+How It Works:
+A list of IP phones (by device name, e.g., SEP00AABBCCDDEE) is stored in a simple CSV file.
+Every 5 minutes, a shell script triggers a Python script that:
+SSHs into the CUCM CLI
+Runs show risdb query phone name <device> for each device
+Logs the output (registration status and basic info) to a timestamped log file
+Results are archived for auditing or reporting purposes.
+ 
+Benefits:
+Proactive Monitoring: Helps detect unregistered phones quickly.
+Time Saver: No need to manually log into CUCM GUI and search phone-by-phone.
+Scalable: Can be expanded to hundreds of phones or integrated with SNOW/Splunk/Wx Bot.
+Non-intrusive: Read-only CLI (CMS-NOC-RO) access ensures system integrity.
+ 
+If needed we can easily port the tool to Ansible and Splunk for wider use cases.
