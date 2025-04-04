@@ -1,0 +1,28 @@
+---
+- name: Check CUCM NGTF Phone Registration Status
+  hosts: cucm
+  gather_facts: no
+  vars:
+    phone_list: "{{ lookup('file', 'phones.csv').split('\n')[1:] | map('regex_replace', '^', '') | list }}"
+
+  tasks:
+    - name: Parse CSV device names
+      set_fact:
+        device_names: "{{ phone_list | map('split', ',') | map('last') | list }}"
+
+    - name: Check phone registration status
+      vars:
+        log_time: "{{ lookup('pipe', 'date +%Y-%m-%d_%H-%M-%S') }}"
+      shell: "show risdb query phone name {{ item }}"
+      loop: "{{ device_names }}"
+      register: phone_status
+
+    - name: Save output to local log file
+      local_action:
+        module: copy
+        content: |
+          {% for res in phone_status.results %}
+          --- Status for {{ res.item }} ---
+          {{ res.stdout }}
+          {% endfor %}
+        dest: "./cucm_phone_logs/phone_status_{{ ansible_date_time.iso8601_basic_short }}.log"
